@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>제대버스앱</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-bar">
+  <button class="icon-btn" id="menu-btn" aria-label="메뉴" title="메뉴"><span class="icon-img i-menu" aria-hidden="true"></span></button>
+    <div class="brand">정류장별 도착</div>
+  <a class="icon-btn" href="setting.html" aria-label="설정" title="설정"><span class="icon-img i-setting" aria-hidden="true"></span></a>
+  </header>
+
+  <aside class="drawer" id="drawer">
+    <div class="backdrop" id="drawer-backdrop"></div>
+    <div class="panel">
+      <h3>메뉴</h3>
+      <nav>
+        <ul class="menu">
+          <li><a href="arrivals.html">정류장별 도착</a></li>
+          <li><a href="route.html">경로 계산</a></li>
+          <li><a href="index.html">홈</a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="container" style="margin-top:12px;">
+    <h1>교내 순환버스 - 정류장별 도착</h1>
+
+  <!-- 즐겨찾기 칩은 경로 계산 화면에서만 노출 -->
+
+    <div class="controls">
+      <label>
+        노선:
+        <select id="direction-select"></select>
+      </label>
+      
+    </div>
+
+    <div class="info">
+      <p id="now-text">—</p>
+  <a id="refresh-now" href="#">새로고침</a>
+    </div>
+
+  <h2>정류장별 다음 도착</h2>
+  <div id="next-arrivals" class="highlight-list"></div>
+
+    <div class="timetable-toggle">
+  <a id="toggle-timetable" href="#">전체 시각표 보기</a>
+    </div>
+
+
+    <div id="timetable" class="timetable"></div>
+    <div class="bottom-spacer" aria-hidden="true"></div>
+  </main>
+
+  <nav class="bottom-nav">
+  <a href="index.html" title="홈" aria-label="홈"><span class="icon-img i-home" aria-hidden="true"></span><span class="sr-only">홈</span></a>
+  <a class="active" href="arrivals.html" title="정류장별 도착" aria-label="정류장별 도착"><span class="icon-img i-bus" aria-hidden="true"></span><span class="sr-only">도착</span></a>
+  <a href="route.html" title="경로 계산" aria-label="경로 계산"><span class="icon-img i-route" aria-hidden="true"></span><span class="sr-only">경로</span></a>
+  </nav>
+
+  <script type="module" src="./js/main.js"></script>
+
+  
+</body>
+</html>

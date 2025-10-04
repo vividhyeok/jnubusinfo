@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>제대버스앱</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-bar">
+  <button class="icon-btn" id="menu-btn" aria-label="메뉴" title="메뉴"><span class="icon-img i-menu" aria-hidden="true"></span></button>
+    <div class="brand">경로 계산</div>
+  <a class="icon-btn" href="setting.html" aria-label="설정" title="설정"><span class="icon-img i-setting" aria-hidden="true"></span></a>
+  </header>
+
+  <aside class="drawer" id="drawer">
+    <div class="backdrop" id="drawer-backdrop"></div>
+    <div class="panel">
+      <h3>메뉴</h3>
+      <nav>
+        <ul class="menu">
+          <li><a href="arrivals.html">정류장별 도착</a></li>
+          <li><a href="route.html">경로 계산</a></li>
+          <li><a href="index.html">홈</a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="container" style="margin-top:12px;">
+    <h1>교내 순환버스 - 경로 계산</h1>
+
+    <div id="favorites" class="chips-bar" aria-label="즐겨찾기 정류장"></div>
+
+    <div class="route-controls">
+      <label>
+  출발 장소:
+  <input id="start-building" placeholder="건물명으로 검색 (정류장 자동 매핑)">
+        <div id="start-suggestions" class="suggestions"></div>
+      </label>
+      <label>
+  도착 장소:
+  <input id="end-building" placeholder="건물명으로 검색 (정류장 자동 매핑)">
+        <div id="end-suggestions" class="suggestions"></div>
+      </label>
+    </div>
+    <datalist id="locations">
+      <option value="사범대학 1호관">
+      <option value="사범대학 2호관">
+      <option value="공과대학 1호관">
+      <option value="공과대학 2호관">
+      <option value="공과대학 3호관">
+      <option value="공과대학 4호관">
+      <option value="해양대학 1호관">
+      <option value="해양대학 2호관">
+      <option value="해양대학 3호관">
+      <option value="해양대학 4호관">
+      <option value="의과대학 1호관">
+      <option value="의과대학 2호관">
+      <option value="약학대학">
+      <option value="해양과학대학 1호관">
+      <option value="해양과학대학 2호관">
+      <option value="인문대학">
+      <option value="사회과학대학">
+      <option value="학생회관">
+      <option value="본관">
+      <option value="중앙도서관">
+      <option value="학생생활관">
+      <option value="교양강의동">
+      <option value="정문">
+      <option value="약학대학">
+      <option value="해양과학대학 1호관">
+      <option value="본관">
+      <option value="학생회관">
+      <option value="인문대학 서쪽">
+      <option value="학생생활관">
+      <option value="인문대학 동쪽">
+      <option value="중앙도서관">
+      <option value="의과대학1호관">
+      <option value="공과대학 4호관">
+      <option value="해양대학 4호관">
+      <option value="교양강의동">
+      <option value="해양과학대학 1호관(말미)">
+    </datalist>
+    <div id="route-result" class="route-result"></div>
+    <div class="bottom-spacer" aria-hidden="true"></div>
+  </main>
+
+  <nav class="bottom-nav">
+  <a href="index.html" title="홈" aria-label="홈"><span class="icon-img i-home" aria-hidden="true"></span><span class="sr-only">홈</span></a>
+  <a href="arrivals.html" title="정류장별 도착" aria-label="정류장별 도착"><span class="icon-img i-bus" aria-hidden="true"></span><span class="sr-only">도착</span></a>
+  <a class="active" href="route.html" title="경로 계산" aria-label="경로 계산"><span class="icon-img i-route" aria-hidden="true"></span><span class="sr-only">경로</span></a>
+  </nav>
+
+  <script type="module" src="./js/main.js"></script>
+
+  
+</body>
+</html>

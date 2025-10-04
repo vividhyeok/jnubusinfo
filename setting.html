@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>제대버스앱</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-bar">
+  <button class="icon-btn" id="menu-btn" aria-label="메뉴" title="메뉴"><span class="icon-img i-menu" aria-hidden="true"></span></button>
+    <div class="brand">설정</div>
+  <a class="icon-btn" id="settings-close" href="index.html" aria-label="홈" title="홈"><span class="icon-img i-home" aria-hidden="true"></span></a>
+  </header>
+
+  <aside class="drawer" id="drawer">
+    <div class="backdrop" id="drawer-backdrop"></div>
+    <div class="panel">
+      <h3>메뉴</h3>
+      <nav>
+        <ul class="menu">
+          <li><a href="index.html">홈</a></li>
+          <li><a href="arrivals.html">정류장별 도착</a></li>
+          <li><a href="route.html">경로 계산</a></li>
+          <li><a href="setting.html">설정</a></li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="container" style="margin-top:12px;">
+    <h1>개인화 설정</h1>
+
+    <!-- 즐겨찾기 정류장 관리 -->
+    <section class="settings-section">
+      <h3>즐겨찾기 건물</h3>
+      <p class="settings-hint">자주 이용하는 건물을 선택하면 홈/도착/경로 상단에 칩으로 노출됩니다. (최대 8개)</p>
+      <input type="text" id="settings-search" placeholder="건물명 검색..." style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #ccc; border-radius:4px;">
+      <div class="settings-list" id="settings-stops"></div>
+    </section>
+
+    <!-- 표시 옵션들 -->
+    <section class="settings-section">
+      <h3>표시 옵션</h3>
+      <label class="item" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="settings-pin-fav">
+        <span>도착 탭에서 즐겨찾기 정류장을 상단에 고정</span>
+      </label>
+      <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
+        <label for="settings-max-summary">첫 화면 요약 개수:</label>
+        <input type="number" id="settings-max-summary" min="0" max="50" step="1" style="width:120px;">
+      </div>
+    </section>
+
+    <!-- 백업/복원 -->
+    <section class="settings-section">
+      <h3>설정 백업/복원</h3>
+      <p class="settings-hint">JSON 문자열로 내보내거나 붙여넣어 복원할 수 있어요. 단말 변경 시 유용합니다.</p>
+      <textarea id="settings-export" rows="4" style="width:100%; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;"></textarea>
+      <div class="settings-actions">
+        <button class="btn btn-outline" id="btn-export-copy">내 설정 내보내기(복사)</button>
+        <button class="btn" id="btn-import-apply">설정 가져오기 적용</button>
+      </div>
+    </section>
+
+    <div class="bottom-spacer" aria-hidden="true"></div>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" title="홈" aria-label="홈"><span class="icon-img i-home" aria-hidden="true"></span><span class="sr-only">홈</span></a>
+    <a href="arrivals.html" title="정류장별 도착" aria-label="정류장별 도착"><span class="icon-img i-bus" aria-hidden="true"></span><span class="sr-only">도착</span></a>
+    <a href="route.html" title="경로 계산" aria-label="경로 계산"><span class="icon-img i-route" aria-hidden="true"></span><span class="sr-only">경로</span></a>
+  </nav>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
