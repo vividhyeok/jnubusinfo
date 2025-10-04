@@ -32,14 +32,3 @@ export function getChosung(str) {
   }
   return result;
 }
-
-// Returns true if every character of `needle` appears in order in `haystack` (not necessarily contiguous).
-// This makes 초성 부분 검색(예: ㄱㅇ → 골프아카데미) 가능.
-export function isSubsequence(needle, haystack) {
-  if (!needle) return true;
-  let i = 0;
-  for (let j = 0; j < haystack.length && i < needle.length; j++) {
-    if (haystack[j] === needle[i]) i++;
-  }
-  return i === needle.length;
-}
