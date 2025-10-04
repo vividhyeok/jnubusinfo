@@ -1,6 +1,6 @@
 {
-  "name": "제대버스앱",
-  "short_name": "제대버스앱",
+  "name": "JENBI",
+  "short_name": "JENBI",
   "start_url": "arrivals.html",
   "display": "standalone",
   "theme_color": "#007bff",

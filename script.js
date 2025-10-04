@@ -689,7 +689,7 @@ function calculateRoute() {
     const hours = Math.floor(remaining / 60);
     const mins = remaining % 60;
     $routeResult.innerHTML = `
-      <p>금일 순환버스는 마감됐습니다.</p>
+  <p>금일 JENBI 기준 운행은 마감됐습니다.</p>
       <p><strong>마지막 차:</strong> ${minToHHMM(lastTime)}</p>
       <p><strong>남은 시간:</strong> ${hours}시간 ${mins}분</p>
     `;
