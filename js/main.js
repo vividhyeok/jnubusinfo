@@ -47,10 +47,35 @@ const $btnImportApply = document.getElementById('btn-import-apply');
 const $settingsClose = document.getElementById('settings-close');
 
 let lastActiveInput = null;
+// PWA: Service Worker 등록
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
 // simple debounce utility
 function debounce(fn, delay = 300) {
   let t = null;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+// PWA 설치 프롬프트 핸들러
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('install-app');
+  if (btn) btn.style.display = 'inline-flex';
+});
+
+export async function promptInstall() {
+  if (!deferredPrompt) return false;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice.catch(()=>({outcome:'dismissed'}));
+  deferredPrompt = null;
+  const btn = document.getElementById('install-app');
+  if (btn) btn.style.display = 'none';
+  return outcome === 'accepted';
 }
 
 function readWriteMeta(initOnly=false) {
