@@ -55,14 +55,16 @@ export function calculateRoute(DATA, $routeResult, startValue, endValue) {
     if (!startTimes || !endTimes) continue;
     const startIdx = r.stopsOrder.indexOf(startName);
     const endIdx = r.stopsOrder.indexOf(endName);
-    if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) continue; // 방향 고려: 시작이 도착보다 앞에 있어야 함
+    if (startIdx === -1 || endIdx === -1) continue; // 노선에 정류장이 없으면 스킵
     const startArrivals = startTimes.map(hhmm => hhmmToMin(hhmm));
     const endArrivals = endTimes.map(hhmm => hhmmToMin(hhmm));
     const nextStart = startArrivals.find(t => t >= nowMin);
     if (!nextStart) continue; // 오늘 남은 버스 없음
     const idx = startArrivals.indexOf(nextStart);
-    const arrivalTime = endArrivals[idx];
-    if (typeof arrivalTime !== 'number') continue; // 방어
+    // 순환 노선 처리: 도착 정류장이 리스트상 앞에 있으면 다음 회차(idx+1) 도착을 사용
+    const endIndexForTrip = endIdx < startIdx ? idx + 1 : idx;
+    const arrivalTime = endArrivals[endIndexForTrip];
+    if (typeof arrivalTime !== 'number') continue; // 해당 회차로는 도착 불가(운행 종료 등)
     const waitTime = nextStart - nowMin;
     const travelTime = Math.max(0, arrivalTime - nextStart);
     const totalTime = waitTime + travelTime;
@@ -79,7 +81,7 @@ export function calculateRoute(DATA, $routeResult, startValue, endValue) {
       if (!startTimes || !endTimes) continue;
       const startIdx = r.stopsOrder.indexOf(startName);
       const endIdx = r.stopsOrder.indexOf(endName);
-      if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) continue; // 방향 고려
+      if (startIdx === -1 || endIdx === -1) continue;
       const startArrivals = startTimes.map(hhmm => hhmmToMin(hhmm));
       const lastTime = Math.max(...startArrivals);
       if (!isFinite(lastTime)) continue;
@@ -112,7 +114,6 @@ export function calculateRoute(DATA, $routeResult, startValue, endValue) {
         <div class="title">경로 안내${idx+1}</div>
         <div class="chips">
           <span class="chip ${routeChipClass}">${c.route.route}</span>
-          <span class="chip">${c.route.directionId}</span>
           <span class="chip ${c.totalTime <= top[0].totalTime ? 'primary' : 'muted'}">총 ${c.totalTime}분</span>
         </div>
       </div>
