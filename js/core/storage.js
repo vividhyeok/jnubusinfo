@@ -4,6 +4,7 @@ const META_KEY = 'jnubus.meta.v1';
 // Compact encoding schema (C1): shorter keys to reduce storage size
 // Top-level: favorites(f), prefs(p), last(l), recentDests(r)
 // prefs: defaultTab(dt), defaultDirectionId(dd), pinFavoritesOnTop(pf), showSoonOnlyMinutes(sm), maxSummaryCount(ms)
+// themeColor(tc)
 // last: directionId(d), start(s), end(e)
 
 function toCompact(meta) {
@@ -17,7 +18,8 @@ function toCompact(meta) {
       dd: p.defaultDirectionId ?? null,
       pf: p.pinFavoritesOnTop !== false,
       sm: p.showSoonOnlyMinutes ?? 0,
-  ms: p.maxSummaryCount ?? 0,
+      ms: p.maxSummaryCount ?? 0,
+      tc: p.themeColor || '#007bff'
     },
     l: {
       d: l.directionId ?? null,
@@ -37,7 +39,8 @@ function fromCompact(c) {
       defaultDirectionId: c.p?.dd ?? null,
       pinFavoritesOnTop: c.p?.pf !== false,
       showSoonOnlyMinutes: c.p?.sm ?? 0,
-  maxSummaryCount: c.p?.ms ?? 0,
+      maxSummaryCount: c.p?.ms ?? 0,
+      themeColor: c.p?.tc || '#007bff'
     },
     last: {
       directionId: c.l?.d ?? null,

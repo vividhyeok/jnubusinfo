@@ -31,7 +31,19 @@
   <main class="container" style="margin-top:12px;">
   <h1>JENBI - 경로 계산</h1>
 
-    <div id="favorites" class="chips-bar" aria-label="즐겨찾기 정류장"></div>
+    <section class="favorites-section" aria-label="즐겨찾기 정류장">
+      <h2>즐겨찾기</h2>
+      <p class="section-hint">칩을 누르면 최근에 입력한 칸(출발/도착)에 즉시 채워집니다.</p>
+      <div id="favorites" class="chips-bar" data-empty-text="설정에서 즐겨찾기를 등록하면 여기에서 바로 사용할 수 있어요."></div>
+    </section>
+
+    <div class="route-helper">
+      <p style="margin:0 0 6px; font-weight:600;">경로 입력 팁</p>
+      <ul style="margin:0 0 0 18px; color:#555;">
+        <li>건물명 초성(예: ㅈㄷㅂ)으로도 검색할 수 있어요.</li>
+        <li>최근 목적지가 자동으로 저장되어 다음 검색을 더 빠르게 도와줍니다.</li>
+      </ul>
+    </div>
 
     <div class="route-controls">
       <label>
@@ -44,6 +56,9 @@
   <input id="end-building" placeholder="건물명으로 검색 (정류장 자동 매핑)">
         <div id="end-suggestions" class="suggestions"></div>
       </label>
+      <div class="swap-row">
+        <button id="swap-buildings" type="button" class="btn btn-outline btn-sm swap-btn" aria-label="출발과 도착 바꾸기">출발/도착 바꾸기</button>
+      </div>
     </div>
     <datalist id="locations">
       <option value="사범대학 1호관">
@@ -83,6 +98,12 @@
       <option value="교양강의동">
       <option value="해양과학대학 1호관(말미)">
     </datalist>
+    <section class="favorites-section" aria-label="최근 목적지">
+      <h2>최근 목적지</h2>
+      <p class="section-hint">최근 검색한 도착지가 칩으로 표시됩니다.</p>
+      <div id="recent-dests" class="chips-bar" data-empty-text="도착지를 검색하면 자동으로 저장됩니다."></div>
+    </section>
+
     <div id="route-result" class="route-result"></div>
     <div class="bottom-spacer" aria-hidden="true"></div>
   </main>

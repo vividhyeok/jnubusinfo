@@ -5,10 +5,19 @@ import { nowMinutesLocal, minToHHMM, hhmmToMin, getChosung } from './core/utils.
 import { renderNow, computeNextArrivalsAdvanced, buildTimetableAdvanced } from './features/arrivals.js';
 import { calculateRoute } from './features/route.js';
 
+const DEFAULT_THEME_COLOR = '#007bff';
+
 let DATA = null;
 let META = {
   favorites: [],
-  prefs: { defaultTab: 'arrivals', defaultDirectionId: null, pinFavoritesOnTop: true, showSoonOnlyMinutes: 0, maxSummaryCount: 0 },
+  prefs: {
+    defaultTab: 'arrivals',
+    defaultDirectionId: null,
+    pinFavoritesOnTop: true,
+    showSoonOnlyMinutes: 0,
+    maxSummaryCount: 0,
+    themeColor: DEFAULT_THEME_COLOR
+  },
   last: { directionId: null, start: '', end: '' },
   recentDests: []
 };
@@ -20,6 +29,7 @@ const isSetting = window.location.pathname.includes('setting.html');
 const isHome = window.location.pathname.endsWith('/index.html') || /\/$/.test(window.location.pathname);
 let currentTab = (window.location.pathname.includes('route.html')) ? 'route' : 'arrivals';
 let timetableMode = 'compact';
+let focusStop = null;
 
 // Elements
 const $direction = isArrivals ? document.getElementById('direction-select') : null;
@@ -45,6 +55,12 @@ const $exportArea = document.getElementById('settings-export');
 const $btnExportCopy = document.getElementById('btn-export-copy');
 const $btnImportApply = document.getElementById('btn-import-apply');
 const $settingsClose = document.getElementById('settings-close');
+const $arrivalsEmpty = isArrivals ? document.getElementById('arrivals-empty') : null;
+const $themeColor = document.getElementById('theme-color');
+const $themePreview = document.getElementById('theme-preview');
+const $themePreviewText = document.querySelector('[data-theme-preview-text]');
+const themePresetButtons = document.querySelectorAll('[data-theme-color]');
+const $swapBtn = isRoute ? document.getElementById('swap-buildings') : null;
 
 let lastActiveInput = null;
 // PWA: Service Worker 등록
@@ -78,6 +94,36 @@ export async function promptInstall() {
   return outcome === 'accepted';
 }
 
+function adjustColor(hexColor, amount) {
+  const base = (hexColor || DEFAULT_THEME_COLOR).replace('#', '');
+  const hex = base.length === 3 ? base.split('').map(ch => ch + ch).join('') : base.padStart(6, '0');
+  const num = parseInt(hex, 16);
+  if (Number.isNaN(num)) return DEFAULT_THEME_COLOR;
+  let r = (num >> 16) + amount;
+  let g = ((num >> 8) & 0xff) + amount;
+  let b = (num & 0xff) + amount;
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function applyThemeColor() {
+  const color = (META.prefs?.themeColor || DEFAULT_THEME_COLOR).toLowerCase();
+  const normalized = color.startsWith('#') ? color : `#${color}`;
+  const darker = adjustColor(normalized, -40);
+  const softer = adjustColor(normalized, 80);
+  const root = document.documentElement;
+  root.style.setProperty('--primary', normalized);
+  root.style.setProperty('--primary-dark', darker);
+  root.style.setProperty('--primary-soft', softer);
+  const metaTag = document.querySelector('meta[name="theme-color"]');
+  if (metaTag) metaTag.setAttribute('content', normalized);
+  if ($themeColor && $themeColor.value !== normalized) $themeColor.value = normalized;
+  if ($themePreview) $themePreview.style.background = softer;
+  if ($themePreviewText) $themePreviewText.textContent = normalized.toUpperCase();
+}
+
 function readWriteMeta(initOnly=false) {
   const saved = readMeta();
   if (saved) { META = Object.assign(META, saved); HAS_SAVED_META = true; }
@@ -98,7 +144,8 @@ async function loadAndApplyMetaConfig() {
     defaultDirectionId: readMetaTag('app:default-direction-id') || undefined,
     pinFavoritesOnTop: readMetaTag('app:pin-favorites-on-top'),
     showSoonOnlyMinutes: readMetaTag('app:show-soon-only-minutes'),
-    maxSummaryCount: readMetaTag('app:max-summary-count')
+    maxSummaryCount: readMetaTag('app:max-summary-count'),
+    themeColor: readMetaTag('app:theme-color') || undefined
   };
   // normalize types for tagCfg
   if (typeof tagCfg.pinFavoritesOnTop === 'string') tagCfg.pinFavoritesOnTop = tagCfg.pinFavoritesOnTop === 'true';
@@ -126,6 +173,8 @@ async function loadAndApplyMetaConfig() {
     META.prefs.showSoonOnlyMinutes = merged.showSoonOnlyMinutes;
   if (typeof merged.maxSummaryCount === 'number' && (META.prefs?.maxSummaryCount === 0 || typeof META.prefs?.maxSummaryCount === 'undefined'))
     META.prefs.maxSummaryCount = merged.maxSummaryCount;
+  if (merged.themeColor && (!META.prefs?.themeColor || META.prefs.themeColor === DEFAULT_THEME_COLOR))
+    META.prefs.themeColor = merged.themeColor;
 
   if (!HAS_SAVED_META) writeMeta(META);
 }
@@ -242,21 +291,36 @@ function buildSettingsStops() {
   }
 }
 
+function renderChipPlaceholder($container, text) {
+  if (!$container) return;
+  $container.innerHTML = `<span class="chip muted">${text}</span>`;
+}
+
 function applyPersonalization() {
   if ($favorites) {
-    $favorites.innerHTML = META.favorites.map(n => `<button class="chip favorite" data-building="${n}" data-stop="${getStop(DATA, n)}">${n}</button>`).join('');
-    $favorites.querySelectorAll('button[data-stop]').forEach(btn => {
-      btn.addEventListener('click', () => onFavoriteClick(btn));
-    });
+    if (!META.favorites.length) {
+      const emptyText = $favorites.dataset?.emptyText || '즐겨찾기를 등록하면 여기에서 바로 이동할 수 있어요.';
+      renderChipPlaceholder($favorites, emptyText);
+    } else {
+      $favorites.innerHTML = META.favorites.map(n => `<button class="chip favorite" data-building="${n}" data-stop="${getStop(DATA, n)}">${n}</button>`).join('');
+      $favorites.querySelectorAll('button[data-stop]').forEach(btn => {
+        btn.addEventListener('click', () => onFavoriteClick(btn));
+      });
+    }
   }
   if ($recentDests) {
     const list = (META.recentDests || []).slice(0, 6);
-    $recentDests.innerHTML = list.map(n => `<button class="chip" data-dest="${n}">${n}</button>`).join('');
-    $recentDests.querySelectorAll('button[data-dest]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if ($endBuilding) $endBuilding.value = btn.dataset.dest; doRoute();
+    if (!list.length) {
+      const emptyText = $recentDests.dataset?.emptyText || '최근 검색한 목적지가 없습니다.';
+      renderChipPlaceholder($recentDests, emptyText);
+    } else {
+      $recentDests.innerHTML = list.map(n => `<button class="chip" data-dest="${n}">${n}</button>`).join('');
+      $recentDests.querySelectorAll('button[data-dest]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if ($endBuilding) $endBuilding.value = btn.dataset.dest; doRoute();
+        });
       });
-    });
+    }
   }
 }
 
@@ -276,6 +340,8 @@ function onFavoriteClick(btn) {
       if (!$endBuilding.value) { $endBuilding.value = buildingName; doRoute(); return; }
       $startBuilding.value = buildingName; doRoute();
     }
+  } else if (isHome) {
+    window.location.href = `arrivals.html#fs=${encodeURIComponent(buildingName)}`;
   }
 }
 
@@ -331,13 +397,26 @@ function renderCompactTimetable(direction) {
 function renderTimetable(direction) { if (timetableMode === 'compact') return renderCompactTimetable(direction); return renderTable(direction); }
 
 function renderNext(direction) {
+  if (!$next) return;
   const nowMin = nowMinutesLocal();
   let list = computeNextArrivalsAdvanced(DATA, direction, nowMin);
   const favSet = new Set(META.prefs?.pinFavoritesOnTop !== false ? META.favorites : []);
   if (favSet.size) list.sort((a,b)=> (favSet.has(a.stop)?0:1) - (favSet.has(b.stop)?0:1));
   const soonN = META.prefs?.showSoonOnlyMinutes || 0; if (soonN > 0) list = list.filter(it => it.current && it.current.eta <= soonN);
   const maxN = META.prefs?.maxSummaryCount || 0; if (maxN > 0) list = list.slice(0, Math.max(0, maxN));
-  const $next = document.getElementById('next-arrivals'); $next.innerHTML = '';
+  $next.innerHTML = '';
+  if (!list.length) {
+    if ($arrivalsEmpty) {
+      const reasons = [];
+      if (soonN > 0) reasons.push(`${soonN}분 이내만 보기`);
+      if (maxN > 0) reasons.push(`최대 ${maxN}개`);
+      const detail = reasons.length ? ` (적용 중: ${reasons.join(', ')})` : '';
+      $arrivalsEmpty.textContent = `현재 표시할 도착 정보가 없어요${detail}. 필터를 조정하거나 잠시 후 다시 확인해 주세요.`;
+      $arrivalsEmpty.hidden = false;
+    }
+    return;
+  }
+  if ($arrivalsEmpty) $arrivalsEmpty.hidden = true;
   list.forEach(item => {
     const div = document.createElement('div'); div.className = 'highlight-card';
     const eta = item.current ? item.current.eta : null; let etaClass = 'eta-later'; if (eta !== null) { if (eta <= 2) etaClass = 'eta-soon'; else if (eta <= 7) etaClass = 'eta-near'; }
@@ -425,6 +504,7 @@ function doRoute() {
   if (ok && endName) { META.recentDests = [endName, ...META.recentDests.filter(n => n !== endName)].slice(0, 6); writeMetaDebounced(); applyPersonalization(); }
   // last 저장
   META.last.start = $startBuilding?.value || ''; META.last.end = $endBuilding?.value || ''; writeMetaDebounced();
+  updateURL();
 }
 
 function updateURL() {
@@ -472,6 +552,17 @@ function initSelectors() {
     $endBuilding?.addEventListener('blur', () => { META.last.end = $endBuilding.value || ''; writeMetaDebounced(); });
     $endBuilding?.addEventListener('focus', () => lastActiveInput = $endBuilding);
     $endBuilding?.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doRoute(); }});
+    if ($swapBtn && $startBuilding && $endBuilding) {
+      $swapBtn.addEventListener('click', () => {
+        const temp = $startBuilding.value;
+        $startBuilding.value = $endBuilding.value;
+        $endBuilding.value = temp;
+        META.last.start = $startBuilding.value || '';
+        META.last.end = $endBuilding.value || '';
+        writeMetaDebounced();
+        doRoute();
+      });
+    }
   }
 }
 
@@ -544,6 +635,7 @@ function initBackupRestore() {
         writeMeta(META);
         applyPersonalization();
         buildSettingsStops();
+        applyThemeColor();
         if (isArrivals) refreshAll();
         alert('설정을 적용했어요.');
       } catch (e) {
@@ -551,6 +643,27 @@ function initBackupRestore() {
       }
     });
   }
+}
+
+function initThemeControls() {
+  if ($themeColor) {
+    $themeColor.addEventListener('input', () => {
+      META.prefs.themeColor = $themeColor.value || DEFAULT_THEME_COLOR;
+      writeMetaDebounced();
+      applyThemeColor();
+    });
+  }
+  themePresetButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const color = btn.getAttribute('data-theme-color');
+      if (!color) return;
+      META.prefs.themeColor = color;
+      if ($themeColor) $themeColor.value = color;
+      writeMetaDebounced();
+      applyThemeColor();
+    });
+  });
+  applyThemeColor();
 }
 
 async function start() {
@@ -570,6 +683,7 @@ async function start() {
   initShell();
   // 정적 메타/설정 파일에서 기본값을 먼저 적용
   await loadAndApplyMetaConfig();
+  initThemeControls();
   loadFromURL();
   initSelectors();
   if (isArrivals) setInterval(refreshAll, 60 * 1000);
