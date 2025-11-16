@@ -31,7 +31,11 @@
   <main class="container" style="margin-top:12px;">
   <h1>JENBI - 정류장별 도착</h1>
 
-  <!-- 즐겨찾기 칩은 경로 계산 화면에서만 노출 -->
+    <section class="favorites-section" aria-label="즐겨찾기 정류장">
+      <h2>빠른 정류장 이동</h2>
+      <p class="section-hint">즐겨찾기를 누르면 해당 카드로 바로 스크롤됩니다.</p>
+      <div id="favorites" class="chips-bar" data-empty-text="설정 &gt; 즐겨찾기에서 자주 이용하는 건물을 선택해 보세요."></div>
+    </section>
 
     <div class="controls">
       <label>
@@ -48,9 +52,10 @@
 
   <h2>정류장별 다음 도착</h2>
   <div id="next-arrivals" class="highlight-list"></div>
+  <p id="arrivals-empty" class="empty-state" hidden>현재 표시할 도착 정보가 없어요. 필터나 요약 개수를 조정해 보세요.</p>
 
     <div class="timetable-toggle">
-  <a id="toggle-timetable" href="#">전체 시각표 보기</a>
+  <a id="toggle-timetable" href="#">표로 보기</a>
     </div>
 
 

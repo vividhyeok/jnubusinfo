@@ -40,7 +40,63 @@
   <div style="margin:8px 0 16px;">
     <button id="install-app" class="btn" style="display:none;" type="button" onclick="import('./js/main.js').then(m=>m.promptInstall&&m.promptInstall())">앱으로 설치</button>
   </div>
-  <!-- 즐겨찾기 칩은 경로 계산 화면에서만 노출 -->
+
+  <section class="hero-card" aria-label="빠른 길잡이">
+    <p class="hero-eyebrow">Jeju National University</p>
+    <h2>다음 버스를 놓치지 않도록, 한 화면에서 끝내세요</h2>
+    <p>즐겨찾기, 최근 목적지, 경로 추천을 한 번에 제공하는 제주대학교 교내 순환버스 도우미입니다. 실시간 계산과 오프라인 모드까지 지원해요.</p>
+    <div class="hero-actions">
+      <a class="btn" href="arrivals.html">도착 시간 확인</a>
+      <a class="btn btn-outline" href="route.html">경로 계산하기</a>
+    </div>
+    <div class="hero-status" aria-label="주요 기능">
+      <span class="chip">즐겨찾기</span>
+      <span class="chip">오프라인 지원</span>
+      <span class="chip">PWA 설치</span>
+    </div>
+  </section>
+
+  <section class="quick-links" aria-label="주요 기능 바로가기">
+    <a class="quick-link" href="arrivals.html">
+      <span class="icon-img i-bus" aria-hidden="true"></span>
+      <div>
+        <h3>정류장별 도착</h3>
+        <p>모든 정류장의 다음 도착과 시각표를 한눈에 살펴봐요.</p>
+      </div>
+      <span class="chip primary">열기</span>
+    </a>
+    <a class="quick-link" href="route.html">
+      <span class="icon-img i-route" aria-hidden="true"></span>
+      <div>
+        <h3>경로 계산</h3>
+        <p>출발/도착 건물만 입력하면 가장 빠른 버스를 추천해요.</p>
+      </div>
+      <span class="chip primary">열기</span>
+    </a>
+    <a class="quick-link" href="setting.html">
+      <span class="icon-img i-setting" aria-hidden="true"></span>
+      <div>
+        <h3>개인화 설정</h3>
+        <p>즐겨찾기, 요약 개수, 테마 색상을 내 취향대로 맞춰요.</p>
+      </div>
+      <span class="chip primary">열기</span>
+    </a>
+  </section>
+
+  <section class="favorites-section" aria-live="polite">
+    <h2>즐겨찾기 정류장</h2>
+    <p class="section-hint">설정에서 자주 이용하는 건물을 등록하면 홈에서도 바로 이동할 수 있어요.</p>
+    <div id="favorites" class="chips-bar" data-empty-text="즐겨찾기를 추가하면 자주 가는 건물이 여기 나타납니다."></div>
+  </section>
+
+  <section class="notice-card" aria-label="서비스 안내">
+    <h2>사용 팁</h2>
+    <ul>
+      <li>오른쪽 상단 설정에서 즐겨찾기와 첫 화면 요약 개수를 조절할 수 있어요.</li>
+      <li>경로 계산 탭에서는 최근 목적지 칩과 즐겨찾기를 이용해 입력 없이 바로 검색할 수 있어요.</li>
+      <li>앱으로 설치(PWA)하면 홈 화면에서 바로 실행되고, 오프라인에서도 마지막 정보를 확인할 수 있습니다.</li>
+    </ul>
+  </section>
 
     <section>
       <h2>Q&A (자주 묻는 질문)</h2>
