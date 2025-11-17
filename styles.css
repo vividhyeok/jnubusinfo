@@ -376,8 +376,39 @@ th { background: #f8f9fa; font-weight: 700; }
 
 /* 반응형 */
 @media (max-width: 768px) {
-  .container { padding: 14px; border-radius: 10px; }
+  body {
+    padding-bottom: calc(var(--bottom-nav-height) + 24px + var(--safe-area-inset-bottom));
+  }
+  .container {
+    padding: 14px;
+    border-radius: 12px;
+    box-shadow: none;
+    margin: 0 8px 18px;
+  }
   h1 { font-size: 22px; }
+  .app-bar { padding: 10px 14px; }
+  .hero-card { padding: 16px; }
+  .hero-card h2 { font-size: 22px; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn { width: 100%; }
+  .quick-links { grid-template-columns: 1fr; }
+  .quick-link { align-items: center; }
+  .row { flex-direction: column; align-items: stretch; }
+  .route-card .route-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .route-card .stats { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  table { font-size: 14px; }
+  .stop-card .header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 12px; margin: 0 6px 16px; }
+  h1 { font-size: 20px; }
+  .hero-card h2 { font-size: 20px; }
+  .hero-card p { font-size: 14px; }
+  .quick-link h3 { font-size: 16px; }
+  .quick-link p { font-size: 13px; }
+  .hero-status, .quick-links, .controls { width: 100%; }
+  .controls .btn, .notice-card .btn, .settings-actions .btn { width: 100%; }
 }
 
 /* 강조 리스트/카드 */
