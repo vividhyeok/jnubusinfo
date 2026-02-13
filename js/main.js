@@ -19,7 +19,11 @@ let META = {
     themeColor: DEFAULT_THEME_COLOR
   },
   last: { directionId: null, start: '', end: '' },
-  recentDests: []
+  recentDests: [],
+  busTimeBook: {
+    arrivals: [],
+    routes: []
+  }
 };
 let HAS_SAVED_META = false;
 
@@ -73,6 +77,43 @@ if ('serviceWorker' in navigator) {
 function debounce(fn, delay = 300) {
   let t = null;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+
+function toRecordStamp(ts = new Date()) {
+  return `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,'0')}-${String(ts.getDate()).padStart(2,'0')} ${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}`;
+}
+
+function pushBusTimeBook(type, payload) {
+  if (!META.busTimeBook) META.busTimeBook = { arrivals: [], routes: [] };
+  const target = type === 'route' ? 'routes' : 'arrivals';
+  const current = Array.isArray(META.busTimeBook[target]) ? META.busTimeBook[target] : [];
+  const item = Object.assign({ at: toRecordStamp() }, payload || {});
+  META.busTimeBook[target] = [item, ...current].slice(0, 20);
+  writeMetaDebounced();
+}
+
+function renderBusTimeBookSummary() {
+  const mount = document.getElementById('bus-time-book-summary');
+  if (!mount) return;
+  const arrivals = META.busTimeBook?.arrivals || [];
+  const routes = META.busTimeBook?.routes || [];
+  const latestArr = arrivals[0];
+  const latestRoute = routes[0];
+  mount.innerHTML = `
+    <div class="log-grid">
+      <article class="log-card">
+        <p class="log-label">최근 도착 조회</p>
+        <strong>${latestArr ? latestArr.stop : '기록 없음'}</strong>
+        <p>${latestArr ? `${latestArr.time || '-'} · ${latestArr.at}` : '도착 화면에서 자동 저장됩니다.'}</p>
+      </article>
+      <article class="log-card">
+        <p class="log-label">최근 경로 조회</p>
+        <strong>${latestRoute ? `${latestRoute.start} → ${latestRoute.end}` : '기록 없음'}</strong>
+        <p>${latestRoute ? `${latestRoute.route || '노선 미확정'} · ${latestRoute.at}` : '경로 계산 시 자동 저장됩니다.'}</p>
+      </article>
+    </div>
+  `;
 }
 
 // PWA 설치 프롬프트 핸들러
@@ -308,6 +349,8 @@ function applyPersonalization() {
       });
     }
   }
+  renderBusTimeBookSummary();
+
   if ($recentDests) {
     const list = (META.recentDests || []).slice(0, 6);
     if (!list.length) {
@@ -417,6 +460,9 @@ function renderNext(direction) {
     return;
   }
   if ($arrivalsEmpty) $arrivalsEmpty.hidden = true;
+  if (list[0] && list[0].current) {
+    pushBusTimeBook('arrivals', { stop: list[0].stop, time: list[0].current.time, eta: list[0].current.eta, direction: direction.route });
+  }
   list.forEach(item => {
     const div = document.createElement('div'); div.className = 'highlight-card';
     const eta = item.current ? item.current.eta : null; let etaClass = 'eta-later'; if (eta !== null) { if (eta <= 2) etaClass = 'eta-soon'; else if (eta <= 7) etaClass = 'eta-near'; }
@@ -499,9 +545,21 @@ function doRoute() {
   const startVal = ($startBuilding?.value || '').trim();
   const endVal = ($endBuilding?.value || '').trim();
   if (!startVal || !endVal) { $routeResult.innerHTML = ''; return; }
-  const { ok, endName } = calculateRoute(DATA, $routeResult, startVal, endVal);
+  const result = calculateRoute(DATA, $routeResult, startVal, endVal);
+  const { ok, endName, compared } = result;
   // 최근 목적지 반영
-  if (ok && endName) { META.recentDests = [endName, ...META.recentDests.filter(n => n !== endName)].slice(0, 6); writeMetaDebounced(); applyPersonalization(); }
+  if (ok && endName) {
+    META.recentDests = [endName, ...META.recentDests.filter(n => n !== endName)].slice(0, 6);
+    const best = Array.isArray(compared) && compared[0] ? compared[0] : null;
+    pushBusTimeBook('route', {
+      start: result.startName || startVal,
+      end: endName,
+      route: best?.route?.route || '',
+      wait: typeof best?.waitTime === 'number' ? `${best.waitTime}분` : ''
+    });
+    writeMetaDebounced();
+    applyPersonalization();
+  }
   // last 저장
   META.last.start = $startBuilding?.value || ''; META.last.end = $endBuilding?.value || ''; writeMetaDebounced();
   updateURL();
