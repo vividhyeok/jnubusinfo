@@ -2,7 +2,7 @@
 const META_KEY = 'jnubus.meta.v1';
 
 // Compact encoding schema (C1): shorter keys to reduce storage size
-// Top-level: favorites(f), prefs(p), last(l), recentDests(r)
+// Top-level: favorites(f), prefs(p), last(l), recentDests(r), busTimeBook(bt)
 // prefs: defaultTab(dt), defaultDirectionId(dd), pinFavoritesOnTop(pf), showSoonOnlyMinutes(sm), maxSummaryCount(ms)
 // themeColor(tc)
 // last: directionId(d), start(s), end(e)
@@ -27,6 +27,10 @@ function toCompact(meta) {
       e: l.end ?? '',
     },
     r: Array.isArray(meta.recentDests) ? meta.recentDests : [],
+    bt: {
+      a: Array.isArray(meta.busTimeBook?.arrivals) ? meta.busTimeBook.arrivals : [],
+      r: Array.isArray(meta.busTimeBook?.routes) ? meta.busTimeBook.routes : []
+    }
   };
 }
 
@@ -48,6 +52,10 @@ function fromCompact(c) {
       end: c.l?.e ?? '',
     },
     recentDests: Array.isArray(c.r) ? c.r : [],
+    busTimeBook: {
+      arrivals: Array.isArray(c.bt?.a) ? c.bt.a : [],
+      routes: Array.isArray(c.bt?.r) ? c.bt.r : []
+    }
   };
 }
 
